@@ -121,7 +121,7 @@ public class GameWindow extends Applet implements Runnable {
 	        	int distance = Math.abs((int) Math.round(Math.sqrt(dx*dx+dy*dy)));
 
 	        	if (distance<=5) {
-	        		if (world.get(hit.x, hit.y).id==253) {
+	        		if (world.get(hit.y, hit.x).id==253) {
 	        			Block blc=inv.removeBlock(inv.selected, 1);
 	        			if (blc.id!=253) {
 	        				boolean success = world.add(hit.x, hit.y, blc);

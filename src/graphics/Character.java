@@ -63,7 +63,7 @@ public class Character implements Runnable{
 			if (keyboard.keyDown( KeyEvent.VK_SPACE )) { // Player wants to jump
 				if (fly || noclip) {
 					velY-=1;
-				} else if (world.jumpable(x,y+1) && !fly && !noclip) { // You're not jumping in empty air 
+				} else if (!world.isBlockTraversable(x,y+1) && !fly && !noclip) { // You're not jumping in empty air 
 					velY-=1;
 				}
 			}
@@ -77,7 +77,7 @@ public class Character implements Runnable{
 				velY+=1;
 			}
 			
-			if (!world.isBlockTraversable(x,y+1) && velY==0 && !fly && !noclip) { // Gravity
+			if (world.isBlockTraversable(x,y+1) && velY==0 && !fly && !noclip) { // Gravity
 				velY+=1;
 			}
 			
