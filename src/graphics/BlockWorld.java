@@ -13,11 +13,13 @@ import javax.imageio.ImageIO;
 import blocks.Air;
 import blocks.BlockIdentifier;
 import blocks.bases.Block;
+import blocks.bases.DynamicTextureBlock;
 import blocks.bases.PhysicsBlock;
 
 import utils.BufferedImageUtils;
 
 
+import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -26,16 +28,15 @@ public class BlockWorld {
 	Image renderImage;
 	Graphics2D render;
 	Block[][] worldMap;
-	PhysicsBlock[] physicsBlocks = new PhysicsBlock[1024];
 	PhysicsThread phyThread;
 	BufferedImage[] terrainTiles;
+	ArrayList<DynamicTextureBlock> DTB = new ArrayList<DynamicTextureBlock>();
 	int ySize, xSize;
 	int[] ores;
 	int px=0;
 	int py=0;
 	int x=0;
 	int y=0;
-	int physicsBlockAmount=0;
 	
 	public BlockWorld(int x, int y, GameWindow owner) {
 		System.out.println("Saving world size, and class parent..");
@@ -54,6 +55,10 @@ public class BlockWorld {
 		System.out.println("Loading image tiles...");
 	    terrainTiles = BufferedImageUtils.splitImage(BufferedImageUtils.loadImage(getClass().getResource("/graphics/terrain.png")), 16, 16);
 	    
+	    System.out.println("Initializing pre-render image...");
+	    renderImage = new BufferedImage(xSize*25, ySize*25, BufferedImage.TYPE_INT_ARGB); //parent.createImage(xSize*25, ySize*25);
+		render = (Graphics2D) renderImage.getGraphics();
+	    
 		System.out.println("Generating world...");
 		System.out.println("Filling..");
     	System.out.println("Raising..");
@@ -61,6 +66,7 @@ public class BlockWorld {
 		System.out.println("Growing..");
 		System.out.println("Hiding..");
 		System.out.println("Blocking..");
+	    System.out.println("Pre-rendering world...");
 	    worldMap = new Block[ySize][xSize];
 		Random generator = new Random();
 	    
@@ -96,6 +102,7 @@ public class BlockWorld {
 	    					int height = generator.nextInt(2)+3;
 	    					for (int a=1; a<height+1; a++) {
 	    						worldMap[yr-a][xr] = BlockIdentifier.toBlock(20);
+	    						reDraw(xr,yr-a);
 	    					}
 	    				}
 	    			} else { // Sand layer
@@ -122,24 +129,19 @@ public class BlockWorld {
 	    		}
 	    		if (yr==ySize-1) { // Bedrock layer
 	    				worldMap[yr][xr] = BlockIdentifier.toBlock(17);
-	    				worldMap[yr][xr].onCreate(xr, yr);
 	    		}
 				if (worldMap[yr][xr].hasPhysics) {
 					((PhysicsBlock) worldMap[yr][xr]).onCreate(xr, yr, phyThread);
+					reDraw(xr,yr);
+				} else if (worldMap[yr][xr].hasDynamicTexture) {
+					((DynamicTextureBlock) worldMap[yr][xr]).onCreate(xr, yr, DTB.size());
+					DTB.add((DynamicTextureBlock) worldMap[yr][xr]);
 				} else {
 					worldMap[yr][xr].onCreate(xr, yr);
+					reDraw(xr,yr);
 				}
 	    	}
 	    }
-	    
-	    System.out.println("Pre-rendering world...");
-	    renderImage = new BufferedImage(xSize*25, ySize*25, BufferedImage.TYPE_INT_ARGB); //parent.createImage(xSize*25, ySize*25);
-		render = (Graphics2D) renderImage.getGraphics();
-		for (int yr = 0; yr<ySize; yr++) {
-			for (int xr = 0; xr<xSize; xr++) {
-				render.drawImage(terrainTiles[worldMap[yr][xr].id], xr*25, yr*25, 25, 25, parent);
-			}
-		}
 		
 		System.out.println("Starting physics..");
 		phyThread.begin();
@@ -150,18 +152,17 @@ public class BlockWorld {
 	public Block remove(int x, int y) {
 		if (x<=xSize-1 && y<=ySize-1  && x>=0 && y>=0) {
 			if (worldMap[y][x].breakable) {
-				Block out = BlockIdentifier.toBlock(worldMap[y][x].id);
-				worldMap[y][x] = BlockIdentifier.toBlock(253);
+				Block out = worldMap[y][x];
 				worldMap[y][x].onRemove(0);
-				if (out.hasPhysics) {
-					physicsBlocks[out.physicsId] = null;
-					for (int i=out.physicsId+1; i<physicsBlockAmount; i++) {
-						 PhysicsBlock blc = physicsBlocks[i];
-						 physicsBlocks[i]=null;
-						 physicsBlocks[i-1]=blc;
+				if (out.hasDynamicTexture) {
+					DTB.remove(out.dynamicBlockId);
+					for (int i=out.dynamicBlockId+1; i<DTB.size(); i++) {
+						((Block)DTB.get(i)).dynamicBlockId -= 1;
 					}
 				}
-				render.drawImage(terrainTiles[worldMap[y][x].id], x*25, y*25, 25, 25, parent);
+				worldMap[y][x] = BlockIdentifier.toBlock(253);
+				worldMap[y][x].onCreate(x,y);
+				reDraw(x,y);
 				return out;
 			}
 		}
@@ -174,10 +175,14 @@ public class BlockWorld {
 				worldMap[y][x] = block;
 				if (worldMap[y][x].hasPhysics) {
 					((PhysicsBlock) worldMap[y][x]).onCreate(x, y, phyThread);
+					reDraw(x, y);
+				} else if (worldMap[y][x].hasDynamicTexture) {
+					((DynamicTextureBlock) worldMap[y][x]).onCreate(x, y, DTB.size());
+					DTB.add((DynamicTextureBlock) worldMap[y][x]);
 				} else {
 					worldMap[y][x].onCreate(x, y);
+					reDraw(x, y);
 				}
-				render.drawImage(terrainTiles[worldMap[y][x].id], x*25, y*25, 25, 25, parent);
 				return true;
 			}
 		}
@@ -231,6 +236,9 @@ public class BlockWorld {
 		}
 		
 		BufferedImage image = (BufferedImage) renderImage;
+		for (DynamicTextureBlock block : DTB) {
+			render.drawImage(block.draw(), ((Block)block).x*25, ((Block)block).y*25, 25, 25, this.parent);
+		}
 		g.drawImage(image.getSubimage(x*25, y*25, w*25, h*25), 0, 0, parent);
 		g.drawImage(player.sprite, px*25, py*25, 25, 25, parent);
 	}
@@ -269,6 +277,8 @@ public class BlockWorld {
 				worldMap[yr][xr] = BlockIdentifier.toBlock(r);
 				if (worldMap[yr][xr].hasPhysics) {
 					((PhysicsBlock) worldMap[yr][xr]).onCreate(xr, yr, phyThread);
+				} else if (worldMap[yr][xr].hasDynamicTexture) {
+					DTB.add((DynamicTextureBlock) worldMap[yr][xr]);
 				} else {
 					worldMap[yr][xr].onCreate(xr, yr);
 				}
@@ -278,7 +288,6 @@ public class BlockWorld {
 	    System.out.println("Pre-rendering world...");
 	    renderImage = parent.createImage(xSize*25, ySize*25);
 		render = (Graphics2D) renderImage.getGraphics();
-		physicsBlockAmount = 0;
 		for (int yr = 0; yr<ySize; yr++) {
 			for (int xr = 0; xr<xSize; xr++) {
 				render.drawImage(terrainTiles[worldMap[yr][xr].id], xr*25, yr*25, 25, 25, parent);

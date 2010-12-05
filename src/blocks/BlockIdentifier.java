@@ -5,6 +5,7 @@ import blocks.bases.Block;
 public class BlockIdentifier {
 	public static Block toBlock(int id) {
 		switch (id) {
+			// Normal blocks + Physics blocks
 			case 0: return new Grass();
 			case 1: return new Stone();
 			case 2: return new Dirt();
@@ -20,6 +21,8 @@ public class BlockIdentifier {
 			case 51: return new Redstone();
 			case 253: return new Air();
 			default: return new Air();
+			// Dynamic Texture blocks
+			case 256: return new DTBlockTest();
 		}
 	}
 }

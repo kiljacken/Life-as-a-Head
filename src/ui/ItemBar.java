@@ -18,6 +18,7 @@ import utils.BufferedImageUtils;
 import blocks.Air;
 import blocks.BlockIdentifier;
 import blocks.bases.Block;
+import blocks.bases.DynamicTextureBlock;
 
 public class ItemBar {
 	Block[] items = new Block[9];
@@ -79,7 +80,11 @@ public class ItemBar {
 			} else {
 				g.drawImage(guiImages[0], x+(i*80+40), y, 80, 80, (ImageObserver) dad);
 			}
-			g.drawImage(terrainTiles[items[i].id], x+(i*80+40)+8, y+8, 64, 64, (ImageObserver) dad);
+			if (items[i].hasDynamicTexture) {
+				g.drawImage(((DynamicTextureBlock)items[i]).draw(), x+(i*80+40)+8, y+8, 64, 64, (ImageObserver) dad);
+			} else {
+				g.drawImage(terrainTiles[items[i].id], x+(i*80+40)+8, y+8, 64, 64, (ImageObserver) dad);
+			}
 			if (itemAmounts[i] > 0) {
 				g.setColor(Color.black);
 				g.drawString(Integer.toString(itemAmounts[i]), x+(i*80+40)+8, y+8+10);

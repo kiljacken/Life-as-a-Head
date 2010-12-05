@@ -18,6 +18,7 @@ import javax.imageio.ImageIO;
 
 
 import blocks.BlockIdentifier;
+import blocks.DTBlockTest;
 import blocks.bases.Block;
 import ui.ItemBar;
 import utils.KeyboardInput;
@@ -62,6 +63,7 @@ public class GameWindow extends Applet implements Runnable {
 		start = System.currentTimeMillis();
 		world = new BlockWorld(1024, 64, this);
 		printscreen = false;
+		inv.addBlock(new DTBlockTest(), 1);
 	    
 	    // Set the window size
 	    setSize(800, 680);
@@ -115,7 +117,6 @@ public class GameWindow extends Applet implements Runnable {
 	        	}
 	        }
 	        if (mouse.buttonDownOnce(3)) {
-	        	// FIXME: Can't place blocks further into the world
 	        	int dx = player.getX()-hit.x;
 	        	int dy = player.getY()-hit.y;
 	        	int distance = Math.abs((int) Math.round(Math.sqrt(dx*dx+dy*dy)));

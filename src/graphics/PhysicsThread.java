@@ -2,6 +2,7 @@ package graphics;
 
 import java.util.ArrayList;
 
+import blocks.bases.Block;
 import blocks.bases.PhysicsBlock;
 
 public class PhysicsThread implements Runnable {
@@ -24,9 +25,9 @@ public class PhysicsThread implements Runnable {
 		// Run 1 iteration of the physics loop
 		while(true)
 		{
-			for (int i=0; i<physicsBlocks.size(); i++) {
+			for (PhysicsBlock block : physicsBlocks) {
 				try {
-					this.physicsBlocks.get(i).onTick(world);
+					block.onTick(world);
 				} catch (Throwable e) {}
 			}
 			try {
@@ -42,6 +43,9 @@ public class PhysicsThread implements Runnable {
 	
 	public void unregister(int id) {
 		this.physicsBlocks.remove(id);
+		for (int i=id+1; i<this.physicsBlocks.size(); i++) {
+			((Block)this.physicsBlocks.get(i)).dynamicBlockId -= 1;
+		}
 	}
 	
 }
