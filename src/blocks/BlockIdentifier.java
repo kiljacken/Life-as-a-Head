@@ -6,7 +6,6 @@ public class BlockIdentifier {
 	public static Block toBlock(int id) {
 		switch (id) {
 			// Normal blocks + Physics blocks
-			case 0: return new Grass();
 			case 1: return new Stone();
 			case 2: return new Dirt();
 			case 3: return new GrassDirt();

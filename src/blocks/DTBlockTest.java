@@ -25,7 +25,19 @@ public class DTBlockTest extends Block implements DynamicTextureBlock {
 		BufferedImage out = new BufferedImage(25, 25, BufferedImage.TYPE_INT_RGB);
 		Graphics outG = out.getGraphics();
 		outG.setColor(Color.red);
-		outG.drawString(Integer.toString(generator.nextInt(10)), 15,15);
+		int r = generator.nextInt(256);
+		int g = generator.nextInt(256);
+		int b = generator.nextInt(256);
+		outG.setColor(new Color(r, g, b));
+		outG.drawRect(0, 0, 24, 24);
+		outG.drawRect(1, 1, 22, 22);
+		outG.drawRect(2, 2, 20, 20);
+		outG.drawRect(3, 3, 18, 18);
+		outG.drawRect(4, 4, 16, 16);
+		outG.drawRect(5, 5, 14, 14);
+		outG.drawRect(6, 6, 12, 12);
+		outG.drawRect(7, 7, 10, 10);
+		outG.drawRect(8, 8, 8, 8);
 		return out;
 	}
 

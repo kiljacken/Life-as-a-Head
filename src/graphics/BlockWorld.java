@@ -82,7 +82,7 @@ public class BlockWorld {
 	    	if (generator.nextInt(2)==generator.nextInt(2) && diff<=0 && grassHeight<15) {
 	    		grassHeight += 1;
 	    		diff=1;
-	    	} else if (generator.nextInt(4)==generator.nextInt(4) && diff<=0 && grassHeight<20) {
+	    	} else if (generator.nextInt(8)==generator.nextInt(8) && diff<=0 && grassHeight<20) {
 	    		grassHeight += 1;
 	    		diff=1;
 	    	} else if (generator.nextInt(2)==generator.nextInt(2) && diff>=0 && grassHeight>3) {

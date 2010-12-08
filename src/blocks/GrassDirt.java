@@ -7,6 +7,6 @@ public class GrassDirt extends Block {
 		super();
 		max=64;
 		id=3;
-		dropId=3;
+		dropId=2;
 	}
 }

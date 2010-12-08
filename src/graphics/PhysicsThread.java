@@ -13,6 +13,7 @@ public class PhysicsThread implements Runnable {
 	public PhysicsThread(BlockWorld world) {
 		this.world = world;
 		this.physicsBlocks = new ArrayList<PhysicsBlock>();
+		this.physicsBlocks.ensureCapacity(1024*64);
 		
 		// Initialize our thread
 		this.t = new Thread(this);

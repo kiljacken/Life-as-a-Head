@@ -63,7 +63,6 @@ public class GameWindow extends Applet implements Runnable {
 		start = System.currentTimeMillis();
 		world = new BlockWorld(1024, 64, this);
 		printscreen = false;
-		inv.addBlock(new DTBlockTest(), 1);
 	    
 	    // Set the window size
 	    setSize(800, 680);
